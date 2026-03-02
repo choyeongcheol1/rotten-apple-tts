@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>🍎 썩은 사과 - Ang Bulok na Mansanas</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&family=Lora:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f5f0;
+    --card: #ffffff;
+    --accent: #c0392b;
+    --accent-soft: #e74c3c;
+    --accent-bg: #fdf0ef;
+    --blue: #2c6fbb;
+    --blue-bg: #eef4fb;
+    --green: #1e8449;
+    --green-bg: #eafaf1;
+    --gold: #b7791f;
+    --gold-bg: #fefce8;
+    --text: #2d2520;
+    --text-light: #6b5e57;
+    --border: #e8ddd4;
+    --shadow: 0 2px 16px rgba(120,80,50,0.08);
+    --radius: 14px;
+    --player-bg: #1a1210;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 140px;
+  }
+
+  /* ===== HEADER ===== */
+  .hero {
+    background: linear-gradient(135deg, #c0392b 0%, #922b21 60%, #641e16 100%);
+    color: white;
+    text-align: center;
+    padding: 40px 20px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .hero-icon { font-size: 52px; display: block; margin-bottom: 8px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+  .hero h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 2px; }
+  .hero .subtitle { font-family: 'Lora', serif; font-size: 16px; font-weight: 500; opacity: 0.9; font-style: italic; }
+  .hero .tagline { margin-top: 10px; font-size: 12px; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase; }
+
+  /* ===== NAV TABS ===== */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .nav::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    flex: 1;
+    min-width: 80px;
+    padding: 14px 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-light);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-bg); }
+
+  /* ===== LANGUAGE TOGGLE ===== */
+  .lang-toggle {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lang-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .lang-btn.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+  .lang-btn:active { transform: scale(0.95); }
+
+  /* ===== CONTENT ===== */
+  .container { max-width: 600px; margin: 0 auto; padding: 0 12px; }
+
+  .section { display: none; padding-top: 12px; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-intro { text-align: center; padding: 16px; margin-bottom: 8px; }
+  .section-intro .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; background: var(--accent); color: white;
+    border-radius: 50%; font-weight: 800; font-size: 16px; margin-bottom: 6px;
+  }
+  .section-intro h2 { font-size: 18px; font-weight: 800; color: var(--accent); }
+
+  /* ===== LINE CARD ===== */
+  .line-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .line-card.playing-card {
+    border-color: var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent-bg), var(--shadow);
+  }
+
+  .line-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .line-num {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 0 0 8px 0;
+  }
+
+  /* Play button on each card */
+  .card-play-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 12px 0 0;
+    padding: 5px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    background: white;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .card-play-btn:hover { background: var(--accent-bg); border-color: var(--accent); }
+  .card-play-btn:active { transform: scale(0.95); }
+  .card-play-btn.is-playing { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .line-content { padding: 10px 16px 16px; }
+
+  .lang-row { margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; transition: all 0.3s; }
+  .lang-row:last-child { margin-bottom: 0; }
+
+  .lang-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+  .lang-text { font-size: 15px; line-height: 1.65; }
+
+  .row-kor { background: var(--accent-bg); }
+  .row-kor .lang-label { color: var(--accent); }
+  .row-kor .lang-text { color: var(--text); font-weight: 600; }
+
+  .row-fil { background: var(--blue-bg); }
+  .row-fil .lang-label { color: var(--blue); }
+  .row-fil .lang-text { color: var(--blue); font-family: 'Lora', serif; font-size: 15.5px; font-weight: 500; }
+
+  .row-eng { background: var(--green-bg); }
+  .row-eng .lang-label { color: var(--green); }
+  .row-eng .lang-text { color: var(--green); font-family: 'Lora', serif; font-style: italic; font-size: 14px; }
+
+  .row-pron { background: var(--gold-bg); }
+  .row-pron .lang-label { color: var(--gold); }
+  .row-pron .lang-text { color: var(--gold); font-size: 14px; font-weight: 600; }
+
+  .lang-row.hidden { display: none; }
+
+  /* ===== BOTTOM PLAYER ===== */
+  .player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--player-bg);
+    color: white;
+    z-index: 300;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+    padding: 0 0 env(safe-area-inset-bottom);
+  }
+
+  .player-progress {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+  }
+  .player-progress-fill {
+    height: 100%;
+    background: var(--accent-soft);
+    width: 0%;
+    transition: width 0.3s linear;
+  }
+
+  .player-content {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+  .player-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .player-btn:active { transform: scale(0.9); }
+
+  .player-btn-sm {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .player-btn-sm:active { transform: scale(0.9); }
+
+  .player-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .player-title {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .player-sub {
+    font-size: 11px;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-time {
+    font-size: 11px;
+    opacity: 0.5;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== NO FILE NOTICE ===== */
+  .no-file-notice {
+    display: none;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 12px;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* ===== FONT SIZE CONTROL ===== */
+  .font-control {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    display: flex;
+    gap: 4px;
+    z-index: 200;
+  }
+
+  .font-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .font-btn:active { transform: scale(0.9); background: var(--accent-bg); }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-light);
+    font-size: 12px;
+  }
+  .footer .church { font-weight: 700; color: var(--accent); }
+
+  /* ===== PLAY ALL SECTION BUTTON ===== */
+  .section-play-all {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .section-play-all button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border: 2px solid var(--accent);
+    border-radius: 30px;
+    background: white;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+  }
+  .section-play-all button:hover { background: var(--accent); color: white; }
+  .section-play-all button:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hero">
+  <span class="hero-icon">🍎</span>
+  <h1>썩은 사과</h1>
+  <div class="subtitle">Ang Bulok na Mansanas</div>
+  <div class="tagline">The Rotten Apple</div>
+</div>
+
+<!-- SECTION NAV -->
+<div class="nav" id="nav"></div>
+
+<!-- LANGUAGE TOGGLE -->
+<div class="lang-toggle" id="langToggle"></div>
+
+<!-- NO FILE NOTICE -->
+<div class="no-file-notice" id="noFileNotice">
+  ⚠️ MP3 파일을 찾을 수 없습니다.<br>
+  <b>output_learning_full</b> 폴더의 MP3 파일들을<br>
+  이 HTML 파일과 같은 폴더의 <b>mp3/</b> 폴더에 넣어주세요.
+</div>
+
+<div class="container" id="content"></div>
+
+<!-- FONT SIZE CONTROL -->
+<div class="font-control">
+  <button class="font-btn" onclick="changeFontSize(-1)">A-</button>
+  <button class="font-btn" onclick="changeFontSize(1)">A+</button>
+</div>
+
+<div class="footer">
+  <span class="church">세린교회</span> · 필리핀 선교 자료<br>
+  썩은 사과 전도 메시지 (한·필·영)
+</div>
+
+<!-- BOTTOM PLAYER BAR -->
+<div class="player-bar" id="playerBar">
+  <div class="player-progress" onclick="seekAudio(event)">
+    <div class="player-progress-fill" id="progressFill"></div>
+  </div>
+  <div class="player-content">
+    <button class="player-btn-sm" onclick="playPrev()">⏮</button>
+    <button class="player-btn" id="mainPlayBtn" onclick="toggleMainPlay()">▶</button>
+    <button class="player-btn-sm" onclick="playNext()">⏭</button>
+    <div class="player-info">
+      <div class="player-title" id="playerTitle">재생할 문장을 선택하세요</div>
+      <div class="player-sub" id="playerSub">▶ 버튼 또는 섹션 재생 클릭</div>
+    </div>
+    <div class="player-time" id="playerTime">0:00</div>
+  </div>
+</div>
+
+<script>
+const data = [
+  {
+    title: "겉으로 보이는 사과",
+    shortTitle: "겉보기",
+    lines: [
+      { kor: "탐스럽고 먹음직스러운 사과지요?", fil: "Nakakatakam at masarap ba ang mansanas na ito?", eng: "Is this apple appetizing and delicious?", pron: "나까까따깜 앗 마사랍 바 앙 만사나스 나 이또?" },
+      { kor: "이 사과도 당신도 누가 만드셨을까요?", fil: "Sino ang gumawa ng mansanas na ito at ikaw?", eng: "Who made this apple and you?", pron: "시노 앙 구마와 낭 만사나스 나 이또 앗 이까우?" },
+      { kor: "예 맞아요, 하나님이에요!", fil: "Oo tama ka. Diyos ito!", eng: "Yes, you're right. It's God!", pron: "오오 따마 까. 디요스 이또!" },
+      { kor: "하나님은 지금도 살아계셔서 우리에 대한 모든 것을 알고 계시며", fil: "Buhay pa ang Diyos at alam Niya ang lahat tungkol sa atin,", eng: "God is still alive and He knows everything about us,", pron: "부하이 빠 앙 디요스 옷 알람 니야 앙 라핫 뚱꼴 사 아띤," },
+      { kor: "늘 우리를 사랑한다고 말씀하시는데 우린 잘 깨닫지 못해요? 왜일까요?", fil: "Lagi niyang sinasabi na mahal niya tayo, pero hindi natin napagtanto ng mabuti, bakit?", eng: "He always says that He loves us, but we don't realize it well, why?", pron: "라기 니양 시나사비 나 마할 니야 따요, 뻬로 힌디 나띤 나빠그딴또 낭 마부띠, 바낏?" },
+      { kor: "사과를 잘라보면 그 이유를 알 수 있어요. 사과를 잘라볼까요?", fil: "Kung hatiin ko ang mansanas, makikita mo kung bakit. Hatiin ko ba ito?", eng: "If I cut the apple, you'll see why. Shall I cut this?", pron: "꿍 하띠인 꼬 앙 만사나스, 마끼끼따 모 꿍 바낏. 하띠인 꼬 바 이또?" }
+    ]
+  },
+  {
+    title: "썩은 속 — 우리의 마음",
+    shortTitle: "마음",
+    lines: [
+      { kor: "어때요? 사과의 속이 썩어있어요.", fil: "Ano ang nakikita mo? Bulok ang mansanas sa loob.", eng: "What do you see? The apple is rotten inside.", pron: "아노 앙 나끼끼따 모? 불록 앙 만사나스 사 로옵." },
+      { kor: "겉모습과는 다르게 말이에요.", fil: "Iba ito sa labas.", eng: "It's different from the outside.", pron: "이바 이또 사 라바스." },
+      { kor: "어쩌면 사과의 썩은 속은 우리의 마음일 수 있어요.", fil: "Baka ang bulok sa loob ng mansanas ay ang ating puso.", eng: "Maybe the rotten inside of the apple could be our heart.", pron: "바까 앙 불록 사 로옵 낭 만사나스 아이 앙 아띵 뿌소." },
+      { kor: "이것은 우리가 거짓말하고 누군가를 미워하고 짜증내는 그런 마음들 때문이에요.", fil: "Ito ay dahil sa mga pusong nagsisinungaling, napopoot, at naiinis sa isang tao.", eng: "This is because of the hearts that we lie, hate and get annoyed with someone.", pron: "이또 아이 다힐 사 망아 뿌송 낙시시눙알링, 나뽀뽀옷, 앗 나이이니스 사 이상 따오." },
+      { kor: "우리는 이런 마음들 때문에 자유롭지 못해요.", fil: "Hindi tayo maaaring maging malaya dahil sa mga pusong ito.", eng: "We can not be free because of these hearts.", pron: "힌디 따요 마아아링 마깅 말라야 다힐 사 망아 뿌송 이또." },
+      { kor: "우리의 이런 죄는 오직 하나님만이 씻어주실 수 있는데요.", fil: "Ang Diyos lamang ang makapaglilinis ng ating kasalanan.", eng: "Only God can wash away our sin.", pron: "앙 디요스 라망 앙 마까빡릴리니스 낭 아띵 까살라난." },
+      { kor: "하나님은 우리의 죄를 용서해주시기 위해서 놀라운 방법을 주셨답니다.", fil: "Binigyan tayo ng Diyos ng magandang paraan para mapatawad ang ating kasalanan.", eng: "God gave us an incredible way to forgive our sin.", pron: "비니기안 따요 낭 디요스 낭 마간당 빠라안 빠라 마빠따와드 앙 아띵 까살라난." }
+    ]
+  },
+  {
+    title: "예수님의 십자가와 부활",
+    shortTitle: "십자가",
+    lines: [
+      { kor: "하나님은 그의 아들 예수님을 우리에게 보내셨고", fil: "Ipinadala sa atin ng Diyos ang Kanyang anak, si Hesus.", eng: "God sent us His son, Jesus.", pron: "이피나달라 사 아띤 낭 디요스 앙 까냥 아낙, 시 헤수스." },
+      { kor: "죄 없는 예수님이 십자가에 매달려 죽음으로써 우리의 죄를 용서받게 해주셨어요.", fil: "Pinatawad Niya ang ating kasalanan sa pamamagitan ng pagpapako sa inosenteng Hesus.", eng: "He has forgiven our sin by crucifying innocent Jesus.", pron: "삐나따와드 니야 앙 아띤 까살라난 사 빠마마기딴 낭 빡빠빠꼬 사 이노센뗑 헤수스." },
+      { kor: "사람들은 믿지 않았지만 십자가에 못 박혀 돌아가신 예수님은 하나님의 말씀처럼 사흘 만에 다시 살아나셨어요.", fil: "Hindi naniwala ang mga tao, ngunit si Hesus na ipinako sa krus ay nabuhay muli sa loob ng tatlong araw gaya ng sinabi ng Diyos.", eng: "People didn't believe it, but crucified Jesus came back to life in three days as God said.", pron: "힌디 나니왈라 앙 망아 따오, 응우닛 시 헤수스 나 이삐나꼬 사 크루스 아이 나부하이 물리 사 로옵 낭 따뜨롱 아라우 가야 낭 시나비 낭 디요스." },
+      { kor: "놀랍고 감사하지 않나요?", fil: "Hindi ba't nakakagulat at nagpapasalamat?", eng: "Isn't it surprising and thankful?", pron: "힌디 밧 나까까굴랏 앗 낙빠빠살라-맛?" }
+    ]
+  },
+  {
+    title: "예수님을 마음에 모시기",
+    shortTitle: "영접",
+    lines: [
+      { kor: "자 보세요~ 그림처럼 예수님은 오늘도 당신의 마음 문을 두드리고 계세요.", fil: "Tingnan ang larawang ito. Tulad nito, kumakatok si Hesus sa pintuan ng iyong puso ngayon.", eng: "Look at this picture. Like this, Jesus is knocking on the door of your heart today.", pron: "띵난 앙 라라왕 이또. 뚤라드 니또, 꾸마까똑 시 헤수스 사 삔뚜안 낭 이용 뿌소 응아욘." },
+      { kor: "당신을 위해 죽으심으로 당신의 모든 죄를 다 용서하셨다는 것을 믿고 예수님을 마음에 모신다면", fil: "Kung naniniwala ka na si Hesus ay namatay para sa iyo at pinatawad ang lahat ng iyong mga kasalanan at kung tinatanggap mo si Hesus sa iyong puso,", eng: "If you believe Jesus has died for you and forgiven all your sins and if you take Jesus into your heart,", pron: "꿍 나니니왈라 까 나 시 헤수스 아이 나마따이 빠라 사 이요 앗 삐나따와드 앙 라핫 낭 이용 망아 까살라난 앗 꿍 띠나딴깝 모 시 헤수스 사 이용 뿌소," },
+      { kor: "모든 죄를 용서받고 깨끗한 마음으로 천국에 갈 수 있어요.", fil: "Ikaw ay patatawarin at maaari kang pumunta sa Langit nang may malinis na puso.", eng: "You'll be forgiven and you can go to Heaven with pure heart.", pron: "이까우 아이 빠따따와린 앗 마아아리 깡 뿌문따 사 랑잇 낭 마이 말리니스 나 뿌소." },
+      { kor: "지금 예수님을 마음에 모시길 원하나요?", fil: "Nais mo bang tanggapin si Hesus sa iyong puso ngayon?", eng: "Do you wanna take Jesus into your heart now?", pron: "나이스 모 방 딴깝인 시 헤수스 사 이용 뿌소 응아욘?" },
+      { kor: "그럼 저를 따라서 기도해요.", fil: "Sabayan mo ako sa panalangin.", eng: "Then pray like me.", pron: "사바얀 모 아꼬 사 빠날랑인." },
+      { kor: "하나님 저는 죄를 지었어요. 저희 죄를 대신해서 예수님이 죽으시고 다시 사신 것을 믿어요.", fil: "Diyos ko, nagkasala ako. Naniniwala ako na si Hesus ay namatay para sa ating kasalanan at nabuhay muli.", eng: "God, I have sinned. I believe Jesus died for our sin and lived again.", pron: "디요스 꼬, 낙까살라 아꼬. 나니니왈라 아꼬 나 시 헤수스 아이 나마따이 빠라 사 아띵 까살라난 앗 나부하이 물리." },
+      { kor: "예수님 지금 제 마음에 들어와 주세요. 예수님의 이름으로 기도합니다. 아멘!", fil: "Pumasok ka sa aking puso ngayon, Hesus. Sa pangalan ni Hesus, Amen.", eng: "Please come to my heart now, Jesus. In Jesus name, Amen.", pron: "뿌마속 까 사 아낑 뿌소 응아욘, 헤수스. 사 빵알란 니 헤수스, 아멘." }
+    ]
+  }
+];
+
+// ===== MP3 파일 매핑 =====
+// mp3/ 폴더에 학습용 MP3 파일을 넣어주세요
+function getMp3Path(globalIdx) {
+  const num = String(globalIdx).padStart(2, '0');
+  // 섹션-라인 번호 계산
+  let count = 0;
+  for (let s = 0; s < data.length; s++) {
+    for (let l = 0; l < data[s].lines.length; l++) {
+      count++;
+      if (count === globalIdx) {
+        return `mp3/${num}_${s+1}-${l+1}_learning.mp3`;
+      }
+    }
+  }
+  return null;
+}
+
+// ===== STATE =====
+let activeLangs = { kor: true, fil: true, eng: false, pron: false };
+let activeSection = 0;
+let baseFontSize = 15;
+let currentTrack = 0; // 1-indexed global line number
+let isPlaying = false;
+let audio = new Audio();
+let playMode = 'single'; // 'single' or 'section' or 'all'
+
+// ===== AUDIO EVENTS =====
+audio.addEventListener('timeupdate', () => {
+  if (audio.duration) {
+    const pct = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('playerTime').textContent = formatTime(audio.currentTime) + ' / ' + formatTime(audio.duration);
+  }
+});
+
+audio.addEventListener('ended', () => {
+  if (playMode === 'single') {
+    stopPlayback();
+  } else {
+    // Auto-advance
+    const totalLines = data.reduce((s, sec) => s + sec.lines.length, 0);
+    const nextTrack = currentTrack + 1;
+
+    if (playMode === 'section') {
+      // Check if next track is in same section
+      const currentSection = getSection(currentTrack);
+      const nextSection = getSection(nextTrack);
+      if (nextTrack <= totalLines && currentSection === nextSection) {
+        playTrack(nextTrack);
+      } else {
+        stopPlayback();
+      }
+    } else if (playMode === 'all') {
+      if (nextTrack <= totalLines) {
+        playTrack(nextTrack);
+      } else {
+        stopPlayback();
+      }
+    }
+  }
+});
+
+audio.addEventListener('error', () => {
+  document.getElementById('noFileNotice').style.display = 'block';
+  stopPlayback();
+});
+
+function getSection(globalIdx) {
+  let count = 0;
+  for (let s = 0; s < data.length; s++) {
+    for (let l = 0; l < data[s].lines.length; l++) {
+      count++;
+      if (count === globalIdx) return s;
+    }
+  }
+  return -1;
+}
+
+function getLineInfo(globalIdx) {
+  let count = 0;
+  for (let s = 0; s < data.length; s++) {
+    for (let l = 0; l < data[s].lines.length; l++) {
+      count++;
+      if (count === globalIdx) return { section: s, line: l, data: data[s].lines[l] };
+    }
+  }
+  return null;
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function playTrack(globalIdx) {
+  currentTrack = globalIdx;
+  const path = getMp3Path(globalIdx);
+  const info = getLineInfo(globalIdx);
+
+  if (!path || !info) return;
+
+  audio.src = path;
+  audio.play().catch(() => {
+    document.getElementById('noFileNotice').style.display = 'block';
+  });
+  isPlaying = true;
+
+  // Navigate to correct section
+  const sIdx = info.section;
+  if (sIdx !== activeSection) {
+    showSection(sIdx);
+  }
+
+  // Update UI
+  updatePlayerUI(info);
+  highlightCard(globalIdx);
+  updateMainPlayBtn();
+}
+
+function stopPlayback() {
+  audio.pause();
+  audio.currentTime = 0;
+  isPlaying = false;
+  currentTrack = 0;
+  clearHighlights();
+  updateMainPlayBtn();
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('playerTime').textContent = '0:00';
+}
+
+function toggleMainPlay() {
+  if (isPlaying) {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+    isPlaying = !audio.paused;
+    updateMainPlayBtn();
+  } else {
+    // Start from track 1 if nothing selected
+    playMode = 'all';
+    playTrack(currentTrack || 1);
+  }
+}
+
+function playPrev() {
+  const prev = Math.max(1, (currentTrack || 1) - 1);
+  playTrack(prev);
+}
+
+function playNext() {
+  const totalLines = data.reduce((s, sec) => s + sec.lines.length, 0);
+  const next = Math.min(totalLines, (currentTrack || 0) + 1);
+  playTrack(next);
+}
+
+function seekAudio(e) {
+  if (audio.duration) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  }
+}
+
+function updatePlayerUI(info) {
+  document.getElementById('playerTitle').textContent = info.data.kor;
+  document.getElementById('playerSub').textContent = info.data.fil;
+}
+
+function updateMainPlayBtn() {
+  const btn = document.getElementById('mainPlayBtn');
+  btn.textContent = (isPlaying && !audio.paused) ? '⏸' : '▶';
+}
+
+function highlightCard(globalIdx) {
+  clearHighlights();
+  const card = document.getElementById('card-' + globalIdx);
+  if (card) {
+    card.classList.add('playing-card');
+    const playBtn = card.querySelector('.card-play-btn');
+    if (playBtn) playBtn.classList.add('is-playing');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.playing-card').forEach(el => el.classList.remove('playing-card'));
+  document.querySelectorAll('.card-play-btn.is-playing').forEach(el => el.classList.remove('is-playing'));
+}
+
+// ===== SECTION / LANG / FONT =====
+function showSection(idx) {
+  activeSection = idx;
+  document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === idx));
+}
+
+function toggleLang(lang) {
+  activeLangs[lang] = !activeLangs[lang];
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    const l = btn.getAttribute('data-lang');
+    btn.classList.toggle('active', activeLangs[l]);
+  });
+  document.querySelectorAll('.lang-row').forEach(row => {
+    const l = row.getAttribute('data-lang');
+    row.classList.toggle('hidden', !activeLangs[l]);
+  });
+}
+
+function changeFontSize(delta) {
+  baseFontSize = Math.max(12, Math.min(22, baseFontSize + delta));
+  document.querySelectorAll('.lang-text').forEach(el => el.style.fontSize = baseFontSize + 'px');
+}
+
+function playSectionAll(sIdx) {
+  playMode = 'section';
+  let globalIdx = 0;
+  for (let s = 0; s < sIdx; s++) globalIdx += data[s].lines.length;
+  globalIdx += 1;
+  playTrack(globalIdx);
+}
+
+// ===== RENDER =====
+function render() {
+  // Nav
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  data.forEach((section, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-tab' + (i === 0 ? ' active' : '');
+    btn.innerHTML = `${i+1}부<br><small>${section.shortTitle}</small>`;
+    btn.onclick = () => showSection(i);
+    nav.appendChild(btn);
+  });
+
+  // Lang toggle
+  const toggleDiv = document.getElementById('langToggle');
+  toggleDiv.innerHTML = '';
+  [
+    { key: 'kor', label: '🇰🇷 한국어' },
+    { key: 'fil', label: '🇵🇭 필리핀어' },
+    { key: 'eng', label: '🇬🇧 English' },
+    { key: 'pron', label: '🔤 발음' }
+  ].forEach(lc => {
+    const btn = document.createElement('button');
+    btn.className = 'lang-btn' + (activeLangs[lc.key] ? ' active' : '');
+    btn.setAttribute('data-lang', lc.key);
+    btn.textContent = lc.label;
+    btn.onclick = () => toggleLang(lc.key);
+    toggleDiv.appendChild(btn);
+  });
+
+  // Content
+  const container = document.getElementById('content');
+  container.innerHTML = '';
+  let globalNum = 1;
+
+  data.forEach((section, sIdx) => {
+    const sDiv = document.createElement('div');
+    sDiv.className = 'section' + (sIdx === activeSection ? ' active' : '');
+
+    let html = `
+      <div class="section-intro">
+        <div class="num">${sIdx + 1}</div>
+        <h2>${section.title}</h2>
+      </div>
+      <div class="section-play-all">
+        <button onclick="playSectionAll(${sIdx})">▶ ${sIdx + 1}부 전체 듣기</button>
+      </div>
+    `;
+
+    section.lines.forEach((line, lIdx) => {
+      const gIdx = globalNum;
+      const langs = [
+        { key: 'kor', label: '한국어', cls: 'row-kor' },
+        { key: 'fil', label: 'FILIPINO', cls: 'row-fil' },
+        { key: 'eng', label: 'ENGLISH', cls: 'row-eng' },
+        { key: 'pron', label: '발음 가이드', cls: 'row-pron' }
+      ];
+
+      let rows = '';
+      langs.forEach(l => {
+        const hidden = activeLangs[l.key] ? '' : ' hidden';
+        rows += `
+          <div class="lang-row ${l.cls}${hidden}" data-lang="${l.key}">
+            <div class="lang-label">${l.label}</div>
+            <div class="lang-text">${line[l.key]}</div>
+          </div>
+        `;
+      });
+
+      html += `
+        <div class="line-card" id="card-${gIdx}">
+          <div class="line-header">
+            <span class="line-num">${gIdx}</span>
+            <button class="card-play-btn" onclick="playMode='single'; playTrack(${gIdx})">▶ 듣기</button>
+          </div>
+          <div class="line-content">${rows}</div>
+        </div>
+      `;
+      globalNum++;
+    });
+
+    sDiv.innerHTML = html;
+    container.appendChild(sDiv);
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
