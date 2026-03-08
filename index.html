@@ -432,6 +432,124 @@
   }
   .section-play-all button:hover { background: var(--accent); color: white; }
   .section-play-all button:active { transform: scale(0.96); }
+  /* ===== VOCABULARY SECTION ===== */
+  .vocab-wrap { display: none; max-width: 600px; margin: 0 auto; padding: 0 12px 140px; }
+  .vocab-wrap.active { display: block; }
+
+  .vocab-category {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--accent);
+    padding: 8px 14px;
+    background: var(--accent-bg);
+    border-radius: 10px;
+  }
+
+  .vocab-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .vocab-card:active { transform: scale(0.98); }
+  .vocab-card.flipped { border-color: var(--accent-soft); background: var(--accent-bg); }
+
+  .vocab-top { display: flex; align-items: center; justify-content: space-between; }
+
+  .vocab-listen-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .vocab-listen-btn:hover { background: var(--blue-bg); border-color: var(--blue); }
+  .vocab-listen-btn:active { transform: scale(0.9); }
+  .vocab-listen-btn.playing { background: var(--blue); color: white; border-color: var(--blue); }
+
+  .vocab-fil {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+
+  .vocab-pron {
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 2px;
+  }
+
+  .vocab-answer {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .vocab-card.flipped .vocab-answer { display: block; }
+
+  .vocab-kor {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .vocab-eng {
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 2px;
+  }
+
+  .vocab-example {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .vocab-tap-hint {
+    text-align: center;
+    font-size: 12px;
+    color: #bbb;
+    margin: 12px 0;
+  }
+
+  .vocab-filter {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .vocab-filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .vocab-filter-btn.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -440,6 +558,7 @@
 <div class="main-tabs">
   <button class="main-tab active" onclick="switchContent(0)">🍎 썩은 사과</button>
   <button class="main-tab" onclick="switchContent(1)">🇵🇭 필리핀 국가</button>
+  <button class="main-tab" onclick="showVocab()">📖 단어장</button>
 </div>
 
 <!-- HEADER -->
@@ -472,6 +591,13 @@
 </div>
 
 <div class="container" id="content"></div>
+
+<!-- VOCABULARY SECTION -->
+<div class="vocab-wrap" id="vocabWrap">
+  <div class="vocab-filter" id="vocabFilter"></div>
+  <div class="vocab-tap-hint">카드를 탭하면 뜻이 나옵니다</div>
+  <div id="vocabCards"></div>
+</div>
 
 <!-- FONT SIZE CONTROL -->
 <div class="font-control">
@@ -860,6 +986,191 @@ function playSectionAll(sIdx) {
   globalIdx += 1;
   playTrack(globalIdx);
 }
+
+// ===== VOCABULARY DATA =====
+const vocabData = {
+  "인칭/대명사": [
+    { fil: "ako", pron: "아꼬", kor: "나, 저", eng: "I, me", ex: "Diyos ko, nagkasala ako." },
+    { fil: "ikaw / ka", pron: "이까우 / 까", kor: "너, 당신", eng: "you", ex: "Oo tama ka." },
+    { fil: "siya / niya", pron: "시야 / 니야", kor: "그, 그녀", eng: "he/she", ex: "Alam Niya ang lahat." },
+    { fil: "tayo", pron: "따요", kor: "우리 (듣는 사람 포함)", eng: "we (inclusive)", ex: "Hindi tayo maaaring maging malaya." },
+    { fil: "atin / ating", pron: "아띤 / 아띵", kor: "우리의", eng: "our", ex: "ang ating kasalanan" },
+    { fil: "iyong", pron: "이용", kor: "너의", eng: "your", ex: "sa iyong puso" },
+    { fil: "lahat", pron: "라핫", kor: "모두, 전부", eng: "all, everything", ex: "Kay buti ng Diyos sa lahat." },
+  ],
+  "명사 (신앙)": [
+    { fil: "Diyos", pron: "디요스", kor: "하나님", eng: "God", ex: "Oo tama ka. Diyos ito!" },
+    { fil: "Hesus", pron: "헤수스", kor: "예수님", eng: "Jesus", ex: "kumakatok si Hesus" },
+    { fil: "kasalanan", pron: "까살라난", kor: "죄", eng: "sin", ex: "ang ating kasalanan" },
+    { fil: "puso", pron: "뿌소", kor: "마음, 심장", eng: "heart", ex: "sa iyong puso ngayon" },
+    { fil: "Langit", pron: "랑잇", kor: "천국, 하늘", eng: "Heaven, sky", ex: "pumunta sa Langit" },
+    { fil: "krus", pron: "크루스", kor: "십자가", eng: "cross", ex: "ipinako sa krus" },
+    { fil: "panalangin", pron: "빠날랑인", kor: "기도", eng: "prayer", ex: "Sabayan mo ako sa panalangin." },
+    { fil: "pangalan", pron: "빵알란", kor: "이름", eng: "name", ex: "Sa pangalan ni Hesus" },
+    { fil: "anak", pron: "아낙", kor: "아들, 자녀", eng: "son, child", ex: "ang Kanyang anak, si Hesus" },
+    { fil: "araw", pron: "아라우", kor: "태양, 날", eng: "sun, day", ex: "Lupa ng araw" },
+    { fil: "bituin", pron: "비뚜인", kor: "별", eng: "star", ex: "Ang bituin at araw niya" },
+  ],
+  "명사 (일반)": [
+    { fil: "mansanas", pron: "만사나스", kor: "사과", eng: "apple", ex: "Bulok ang mansanas sa loob." },
+    { fil: "loob", pron: "로옵", kor: "안, 속", eng: "inside", ex: "Bulok ang mansanas sa loob." },
+    { fil: "labas", pron: "라바스", kor: "밖, 겉", eng: "outside", ex: "Iba ito sa labas." },
+    { fil: "tao", pron: "따오", kor: "사람", eng: "person, people", ex: "Hindi naniwala ang mga tao." },
+    { fil: "pintuan", pron: "삔뚜안", kor: "문", eng: "door", ex: "sa pintuan ng iyong puso" },
+    { fil: "kamay", pron: "까마이", kor: "손", eng: "hand", ex: "Ipalakpak ang kamay" },
+    { fil: "dagat", pron: "다갓", kor: "바다", eng: "sea", ex: "Sa dagat at bundok" },
+    { fil: "bundok", pron: "분독", kor: "산", eng: "mountain", ex: "Sa dagat at bundok" },
+    { fil: "watawat", pron: "와따왓", kor: "깃발", eng: "flag", ex: "Ang kislap ng watawat mo'y" },
+    { fil: "lupa", pron: "루빠", kor: "땅", eng: "land", ex: "Lupang Hinirang" },
+  ],
+  "동사": [
+    { fil: "mahal", pron: "마할", kor: "사랑하다", eng: "to love", ex: "mahal niya tayo" },
+    { fil: "namatay", pron: "나마따이", kor: "죽다", eng: "died", ex: "Hesus ay namatay para sa iyo" },
+    { fil: "nabuhay", pron: "나부하이", kor: "살아나다", eng: "came back to life", ex: "nabuhay muli" },
+    { fil: "pinatawad", pron: "삐나따와드", kor: "용서하다", eng: "forgiven", ex: "pinatawad ang lahat" },
+    { fil: "naniniwala", pron: "나니니왈라", kor: "믿다", eng: "believe", ex: "Naniniwala ako na si Hesus" },
+    { fil: "tanggapin", pron: "딴깝인", kor: "받아들이다", eng: "accept", ex: "tanggapin si Hesus sa iyong puso" },
+    { fil: "pumasok", pron: "뿌마속", kor: "들어오다", eng: "enter, come in", ex: "Pumasok ka sa aking puso" },
+    { fil: "kumakatok", pron: "꾸마까똑", kor: "두드리다", eng: "knocking", ex: "kumakatok si Hesus" },
+    { fil: "nagkasala", pron: "낙까살라", kor: "죄를 짓다", eng: "sinned", ex: "nagkasala ako" },
+    { fil: "ipinako", pron: "이삐나꼬", kor: "못 박다", eng: "crucified", ex: "ipinako sa krus" },
+    { fil: "sinasabi", pron: "시나사비", kor: "말하다", eng: "saying", ex: "Lagi niyang sinasabi" },
+    { fil: "hulaan", pron: "훌라안", kor: "추측하다", eng: "guess", ex: "Maaari mo bang hulaan?" },
+    { fil: "hatiin", pron: "하띠인", kor: "자르다", eng: "cut", ex: "Hatiin ko ba ito?" },
+  ],
+  "형용사/부사": [
+    { fil: "mabuti / buti", pron: "마부띠 / 부띠", kor: "좋은, 선한", eng: "good", ex: "Kay buti ng Diyos" },
+    { fil: "bulok", pron: "불록", kor: "썩은", eng: "rotten", ex: "Bulok ang mansanas" },
+    { fil: "malinis", pron: "말리니스", kor: "깨끗한", eng: "clean, pure", ex: "may malinis na puso" },
+    { fil: "malaya", pron: "말라야", kor: "자유로운", eng: "free", ex: "maging malaya" },
+    { fil: "magiting", pron: "마기띵", kor: "용감한", eng: "brave", ex: "Duyan ka nang magiting" },
+    { fil: "buhay", pron: "부하이", kor: "살아있는, 삶", eng: "alive, life", ex: "Buhay pa ang Diyos" },
+    { fil: "lagi", pron: "라기", kor: "항상", eng: "always", ex: "Lagi niyang sinasabi" },
+    { fil: "hindi", pron: "힌디", kor: "아니다, ~않다", eng: "no, not", ex: "Hindi tayo maaaring..." },
+    { fil: "ngayon", pron: "응아욘", kor: "지금", eng: "now", ex: "sa iyong puso ngayon" },
+  ],
+  "접속사/전치사": [
+    { fil: "sa", pron: "사", kor: "~에, ~에서", eng: "in, at, to", ex: "sa iyong puso" },
+    { fil: "ng / nang", pron: "낭", kor: "~의, ~을", eng: "of, (linker)", ex: "Kay buti ng Diyos" },
+    { fil: "ang", pron: "앙", kor: "(주격 표시)", eng: "(subject marker)", ex: "Ang Diyos lamang" },
+    { fil: "at", pron: "앗", kor: "그리고", eng: "and", ex: "Sa dagat at bundok" },
+    { fil: "para", pron: "빠라", kor: "~를 위해", eng: "for", ex: "namatay para sa iyo" },
+    { fil: "dahil", pron: "다힐", kor: "~때문에", eng: "because", ex: "dahil sa mga pusong ito" },
+    { fil: "kung", pron: "꿍", kor: "만약 ~라면", eng: "if", ex: "Kung naniniwala ka" },
+    { fil: "lamang", pron: "라망", kor: "오직, ~만", eng: "only", ex: "Ang Diyos lamang" },
+  ],
+};
+
+let activeVocabCategory = '전체';
+
+function showVocab() {
+  // Update main tabs
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.main-tab')[2].classList.add('active');
+
+  // Hide content mode, show vocab
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('nav').style.display = 'none';
+  document.getElementById('langToggle').style.display = 'none';
+  document.getElementById('speedBar').style.display = 'none';
+  document.getElementById('playerBar').style.display = 'none';
+  document.getElementById('vocabWrap').classList.add('active');
+
+  // Update hero
+  document.querySelector('.hero-icon').textContent = '📖';
+  document.getElementById('heroTitle').textContent = '단어장';
+  document.getElementById('heroSubtitle').textContent = 'Talasalitaan';
+  document.getElementById('heroTagline').textContent = 'Filipino Vocabulary';
+
+  renderVocabFilter();
+  renderVocab();
+}
+
+function hideVocab() {
+  document.getElementById('content').style.display = '';
+  document.getElementById('nav').style.display = '';
+  document.getElementById('langToggle').style.display = '';
+  document.getElementById('speedBar').style.display = '';
+  document.getElementById('playerBar').style.display = '';
+  document.getElementById('vocabWrap').classList.remove('active');
+}
+
+function renderVocabFilter() {
+  const container = document.getElementById('vocabFilter');
+  const categories = ['전체', ...Object.keys(vocabData)];
+  container.innerHTML = '';
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'vocab-filter-btn' + (cat === activeVocabCategory ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => { activeVocabCategory = cat; renderVocabFilter(); renderVocab(); };
+    container.appendChild(btn);
+  });
+}
+
+let vocabAudio = new Audio();
+
+function speakWord(text, btn, e) {
+  e.stopPropagation();
+  vocabAudio.pause();
+  // 파일명: 필리핀어 단어를 소문자+언더스코어로 변환
+  const fname = text.replace(/[^a-zA-Z0-9]/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
+  vocabAudio.src = 'mp3_vocab/' + fname + '.mp3';
+  btn.classList.add('playing');
+  vocabAudio.onended = () => btn.classList.remove('playing');
+  vocabAudio.onerror = () => {
+    btn.classList.remove('playing');
+    // MP3 없으면 브라우저 TTS로 대체
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fil-PH';
+    utterance.rate = 0.85;
+    speechSynthesis.speak(utterance);
+  };
+  vocabAudio.play();
+}
+
+function renderVocab() {
+  const container = document.getElementById('vocabCards');
+  container.innerHTML = '';
+
+  const categories = activeVocabCategory === '전체' ? Object.keys(vocabData) : [activeVocabCategory];
+
+  categories.forEach(cat => {
+    const catDiv = document.createElement('div');
+    catDiv.className = 'vocab-category';
+    const count = vocabData[cat].length;
+    catDiv.textContent = `${cat} (${count}개)`;
+    container.appendChild(catDiv);
+
+    vocabData[cat].forEach(word => {
+      const card = document.createElement('div');
+      card.className = 'vocab-card';
+      card.onclick = () => card.classList.toggle('flipped');
+      card.innerHTML = `
+        <div class="vocab-top">
+          <div>
+            <div class="vocab-fil">${word.fil}</div>
+            <div class="vocab-pron">(${word.pron})</div>
+          </div>
+          <button class="vocab-listen-btn" onclick="speakWord('${word.fil.replace(/'/g, "\\'")}', this, event)" title="듣기">🔊</button>
+        </div>
+        <div class="vocab-answer">
+          <div class="vocab-kor">${word.kor}</div>
+          <div class="vocab-eng">${word.eng}</div>
+          <div class="vocab-example">예문: ${word.ex}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  });
+}
+
+// Override switchContent to also hide vocab
+const origSwitchContent = switchContent;
+switchContent = function(idx) {
+  hideVocab();
+  origSwitchContent(idx);
+};
 
 // ===== RENDER =====
 function render() {
