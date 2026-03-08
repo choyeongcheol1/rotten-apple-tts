@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>🍎 썩은 사과 - Ang Bulok na Mansanas</title>
+<title>🇵🇭 필리핀 선교 학습 - 세린교회</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&family=Lora:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -36,6 +36,28 @@
     -webkit-font-smoothing: antialiased;
     padding-bottom: 140px;
   }
+
+  /* ===== MAIN TABS (콘텐츠 전환) ===== */
+  .main-tabs {
+    display: flex;
+    background: #1a1210;
+  }
+
+  .main-tab {
+    flex: 1;
+    padding: 13px 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .main-tab.active { color: white; border-bottom-color: var(--accent-soft); background: rgba(255,255,255,0.08); }
 
   /* ===== HEADER ===== */
   .hero {
@@ -414,12 +436,18 @@
 </head>
 <body>
 
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <button class="main-tab active" onclick="switchContent(0)">🍎 썩은 사과</button>
+  <button class="main-tab" onclick="switchContent(1)">🇵🇭 필리핀 국가</button>
+</div>
+
 <!-- HEADER -->
-<div class="hero">
+<div class="hero" id="hero">
   <span class="hero-icon">🍎</span>
-  <h1>썩은 사과</h1>
-  <div class="subtitle">Ang Bulok na Mansanas</div>
-  <div class="tagline">The Rotten Apple</div>
+  <h1 id="heroTitle">썩은 사과</h1>
+  <div class="subtitle" id="heroSubtitle">Ang Bulok na Mansanas</div>
+  <div class="tagline" id="heroTagline">The Rotten Apple</div>
 </div>
 
 <!-- SECTION NAV -->
@@ -453,7 +481,7 @@
 
 <div class="footer">
   <span class="church">세린교회</span> · 필리핀 선교 자료<br>
-  썩은 사과 전도 메시지 (한·필·영)
+  썩은 사과 전도 메시지 · 필리핀 국가 (한·필·영)
 </div>
 
 <!-- BOTTOM PLAYER BAR -->
@@ -475,68 +503,127 @@
 </div>
 
 <script>
-const data = [
+// ===== 콘텐츠 데이터셋 =====
+const allContents = [
   {
-    title: "겉으로 보이는 사과",
-    shortTitle: "겉보기",
-    lines: [
-      { kor: "탐스럽고 먹음직스러운 사과지요?", fil: "Nakakatakam at masarap ba ang mansanas na ito?", eng: "Is this apple appetizing and delicious?", pron: "나까까따깜 앗 마사랍 바 앙 만사나스 나 이또?" },
-      { kor: "이 사과도 당신도 누가 만드셨을까요?", fil: "Sino ang gumawa ng mansanas na ito at ikaw?", eng: "Who made this apple and you?", pron: "시노 앙 구마와 낭 만사나스 나 이또 앗 이까우?" },
-      { kor: "예 맞아요, 하나님이에요!", fil: "Oo tama ka. Diyos ito!", eng: "Yes, you're right. It's God!", pron: "오오 따마 까. 디요스 이또!" },
-      { kor: "하나님은 지금도 살아계셔서 우리에 대한 모든 것을 알고 계시며", fil: "Buhay pa ang Diyos at alam Niya ang lahat tungkol sa atin,", eng: "God is still alive and He knows everything about us,", pron: "부하이 빠 앙 디요스 옷 알람 니야 앙 라핫 뚱꼴 사 아띤," },
-      { kor: "늘 우리를 사랑한다고 말씀하시는데 우린 잘 깨닫지 못해요? 왜일까요?", fil: "Lagi niyang sinasabi na mahal niya tayo, pero hindi natin napagtanto ng mabuti, bakit?", eng: "He always says that He loves us, but we don't realize it well, why?", pron: "라기 니양 시나사비 나 마할 니야 따요, 뻬로 힌디 나띤 나빠그딴또 낭 마부띠, 바낏?" },
-      { kor: "사과를 잘라보면 그 이유를 알 수 있어요. 사과를 잘라볼까요?", fil: "Kung hatiin ko ang mansanas, makikita mo kung bakit. Hatiin ko ba ito?", eng: "If I cut the apple, you'll see why. Shall I cut this?", pron: "꿍 하띠인 꼬 앙 만사나스, 마끼끼따 모 꿍 바낏. 하띠인 꼬 바 이또?" }
+    id: 'rotten-apple',
+    icon: '🍎',
+    title: '썩은 사과',
+    subtitle: 'Ang Bulok na Mansanas',
+    tagline: 'The Rotten Apple',
+    mp3Prefix: 'mp3/',
+    mp3Pattern: (num, s, l) => `${num}_${s}-${l}_learning.mp3`,
+    sections: [
+      {
+        title: "겉으로 보이는 사과", shortTitle: "겉보기",
+        lines: [
+          { kor: "탐스럽고 먹음직스러운 사과지요?", fil: "Nakakatakam at masarap ba ang mansanas na ito?", eng: "Is this apple appetizing and delicious?", pron: "나까까따깜 앗 마사랍 바 앙 만사나스 나 이또?" },
+          { kor: "이 사과도 당신도 누가 만드셨을까요?", fil: "Sino ang gumawa ng mansanas na ito at ikaw?", eng: "Who made this apple and you?", pron: "시노 앙 구마와 낭 만사나스 나 이또 앗 이까우?" },
+          { kor: "예 맞아요, 하나님이에요!", fil: "Oo tama ka. Diyos ito!", eng: "Yes, you're right. It's God!", pron: "오오 따마 까. 디요스 이또!" },
+          { kor: "하나님은 지금도 살아계셔서 우리에 대한 모든 것을 알고 계시며", fil: "Buhay pa ang Diyos at alam Niya ang lahat tungkol sa atin,", eng: "God is still alive and He knows everything about us,", pron: "부하이 빠 앙 디요스 옷 알람 니야 앙 라핫 뚱꼴 사 아띤," },
+          { kor: "늘 우리를 사랑한다고 말씀하시는데 우린 잘 깨닫지 못해요? 왜일까요?", fil: "Lagi niyang sinasabi na mahal niya tayo, pero hindi natin napagtanto ng mabuti, bakit?", eng: "He always says that He loves us, but we don't realize it well, why?", pron: "라기 니양 시나사비 나 마할 니야 따요, 뻬로 힌디 나띤 나빠그딴또 낭 마부띠, 바낏?" },
+          { kor: "사과를 잘라보면 그 이유를 알 수 있어요. 사과를 잘라볼까요?", fil: "Kung hatiin ko ang mansanas, makikita mo kung bakit. Hatiin ko ba ito?", eng: "If I cut the apple, you'll see why. Shall I cut this?", pron: "꿍 하띠인 꼬 앙 만사나스, 마끼끼따 모 꿍 바낏. 하띠인 꼬 바 이또?" }
+        ]
+      },
+      {
+        title: "썩은 속 — 우리의 마음", shortTitle: "마음",
+        lines: [
+          { kor: "어때요? 사과의 속이 썩어있어요.", fil: "Ano ang nakikita mo? Bulok ang mansanas sa loob.", eng: "What do you see? The apple is rotten inside.", pron: "아노 앙 나끼끼따 모? 불록 앙 만사나스 사 로옵." },
+          { kor: "겉모습과는 다르게 말이에요.", fil: "Iba ito sa labas.", eng: "It's different from the outside.", pron: "이바 이또 사 라바스." },
+          { kor: "어쩌면 사과의 썩은 속은 우리의 마음일 수 있어요.", fil: "Baka ang bulok sa loob ng mansanas ay ang ating puso.", eng: "Maybe the rotten inside of the apple could be our heart.", pron: "바까 앙 불록 사 로옵 낭 만사나스 아이 앙 아띵 뿌소." },
+          { kor: "이것은 우리가 거짓말하고 누군가를 미워하고 짜증내는 그런 마음들 때문이에요.", fil: "Ito ay dahil sa mga pusong nagsisinungaling, napopoot, at naiinis sa isang tao.", eng: "This is because of the hearts that we lie, hate and get annoyed with someone.", pron: "이또 아이 다힐 사 망아 뿌송 낙시시눙알링, 나뽀뽀옷, 앗 나이이니스 사 이상 따오." },
+          { kor: "우리는 이런 마음들 때문에 자유롭지 못해요.", fil: "Hindi tayo maaaring maging malaya dahil sa mga pusong ito.", eng: "We can not be free because of these hearts.", pron: "힌디 따요 마아아링 마깅 말라야 다힐 사 망아 뿌송 이또." },
+          { kor: "우리의 이런 죄는 오직 하나님만이 씻어주실 수 있는데요.", fil: "Ang Diyos lamang ang makapaglilinis ng ating kasalanan.", eng: "Only God can wash away our sin.", pron: "앙 디요스 라망 앙 마까빡릴리니스 낭 아띵 까살라난." },
+          { kor: "하나님은 우리의 죄를 용서해주시기 위해서 놀라운 방법을 주셨답니다.", fil: "Binigyan tayo ng Diyos ng magandang paraan para mapatawad ang ating kasalanan.", eng: "God gave us an incredible way to forgive our sin.", pron: "비니기안 따요 낭 디요스 낭 마간당 빠라안 빠라 마빠따와드 앙 아띵 까살라난." }
+        ]
+      },
+      {
+        title: "예수님의 십자가와 부활", shortTitle: "십자가",
+        lines: [
+          { kor: "하나님은 그의 아들 예수님을 우리에게 보내셨고", fil: "Ipinadala sa atin ng Diyos ang Kanyang anak, si Hesus.", eng: "God sent us His son, Jesus.", pron: "이피나달라 사 아띤 낭 디요스 앙 까냥 아낙, 시 헤수스." },
+          { kor: "죄 없는 예수님이 십자가에 매달려 죽음으로써 우리의 죄를 용서받게 해주셨어요.", fil: "Pinatawad Niya ang ating kasalanan sa pamamagitan ng pagpapako sa inosenteng Hesus.", eng: "He has forgiven our sin by crucifying innocent Jesus.", pron: "삐나따와드 니야 앙 아띤 까살라난 사 빠마마기딴 낭 빡빠빠꼬 사 이노센뗑 헤수스." },
+          { kor: "사람들은 믿지 않았지만 십자가에 못 박혀 돌아가신 예수님은 하나님의 말씀처럼 사흘 만에 다시 살아나셨어요.", fil: "Hindi naniwala ang mga tao, ngunit si Hesus na ipinako sa krus ay nabuhay muli sa loob ng tatlong araw gaya ng sinabi ng Diyos.", eng: "People didn't believe it, but crucified Jesus came back to life in three days as God said.", pron: "힌디 나니왈라 앙 망아 따오, 응우닛 시 헤수스 나 이삐나꼬 사 크루스 아이 나부하이 물리 사 로옵 낭 따뜨롱 아라우 가야 낭 시나비 낭 디요스." },
+          { kor: "놀랍고 감사하지 않나요?", fil: "Hindi ba't nakakagulat at nagpapasalamat?", eng: "Isn't it surprising and thankful?", pron: "힌디 밧 나까까굴랏 앗 낙빠빠살라-맛?" }
+        ]
+      },
+      {
+        title: "예수님을 마음에 모시기", shortTitle: "영접",
+        lines: [
+          { kor: "자 보세요~ 그림처럼 예수님은 오늘도 당신의 마음 문을 두드리고 계세요.", fil: "Tingnan ang larawang ito. Tulad nito, kumakatok si Hesus sa pintuan ng iyong puso ngayon.", eng: "Look at this picture. Like this, Jesus is knocking on the door of your heart today.", pron: "띵난 앙 라라왕 이또. 뚤라드 니또, 꾸마까똑 시 헤수스 사 삔뚜안 낭 이용 뿌소 응아욘." },
+          { kor: "당신을 위해 죽으심으로 당신의 모든 죄를 다 용서하셨다는 것을 믿고 예수님을 마음에 모신다면", fil: "Kung naniniwala ka na si Hesus ay namatay para sa iyo at pinatawad ang lahat ng iyong mga kasalanan at kung tinatanggap mo si Hesus sa iyong puso,", eng: "If you believe Jesus has died for you and forgiven all your sins and if you take Jesus into your heart,", pron: "꿍 나니니왈라 까 나 시 헤수스 아이 나마따이 빠라 사 이요 앗 삐나따와드 앙 라핫 낭 이용 망아 까살라난 앗 꿍 띠나딴깝 모 시 헤수스 사 이용 뿌소," },
+          { kor: "모든 죄를 용서받고 깨끗한 마음으로 천국에 갈 수 있어요.", fil: "Ikaw ay patatawarin at maaari kang pumunta sa Langit nang may malinis na puso.", eng: "You'll be forgiven and you can go to Heaven with pure heart.", pron: "이까우 아이 빠따따와린 앗 마아아리 깡 뿌문따 사 랑잇 낭 마이 말리니스 나 뿌소." },
+          { kor: "지금 예수님을 마음에 모시길 원하나요?", fil: "Nais mo bang tanggapin si Hesus sa iyong puso ngayon?", eng: "Do you wanna take Jesus into your heart now?", pron: "나이스 모 방 딴깝인 시 헤수스 사 이용 뿌소 응아욘?" },
+          { kor: "그럼 저를 따라서 기도해요.", fil: "Sabayan mo ako sa panalangin.", eng: "Then pray like me.", pron: "사바얀 모 아꼬 사 빠날랑인." },
+          { kor: "하나님 저는 죄를 지었어요. 저희 죄를 대신해서 예수님이 죽으시고 다시 사신 것을 믿어요.", fil: "Diyos ko, nagkasala ako. Naniniwala ako na si Hesus ay namatay para sa ating kasalanan at nabuhay muli.", eng: "God, I have sinned. I believe Jesus died for our sin and lived again.", pron: "디요스 꼬, 낙까살라 아꼬. 나니니왈라 아꼬 나 시 헤수스 아이 나마따이 빠라 사 아띵 까살라난 앗 나부하이 물리." },
+          { kor: "예수님 지금 제 마음에 들어와 주세요. 예수님의 이름으로 기도합니다. 아멘!", fil: "Pumasok ka sa aking puso ngayon, Hesus. Sa pangalan ni Hesus, Amen.", eng: "Please come to my heart now, Jesus. In Jesus name, Amen.", pron: "뿌마속 까 사 아낑 뿌소 응아욘, 헤수스. 사 빵알란 니 헤수스, 아멘." }
+        ]
+      }
     ]
   },
   {
-    title: "썩은 속 — 우리의 마음",
-    shortTitle: "마음",
-    lines: [
-      { kor: "어때요? 사과의 속이 썩어있어요.", fil: "Ano ang nakikita mo? Bulok ang mansanas sa loob.", eng: "What do you see? The apple is rotten inside.", pron: "아노 앙 나끼끼따 모? 불록 앙 만사나스 사 로옵." },
-      { kor: "겉모습과는 다르게 말이에요.", fil: "Iba ito sa labas.", eng: "It's different from the outside.", pron: "이바 이또 사 라바스." },
-      { kor: "어쩌면 사과의 썩은 속은 우리의 마음일 수 있어요.", fil: "Baka ang bulok sa loob ng mansanas ay ang ating puso.", eng: "Maybe the rotten inside of the apple could be our heart.", pron: "바까 앙 불록 사 로옵 낭 만사나스 아이 앙 아띵 뿌소." },
-      { kor: "이것은 우리가 거짓말하고 누군가를 미워하고 짜증내는 그런 마음들 때문이에요.", fil: "Ito ay dahil sa mga pusong nagsisinungaling, napopoot, at naiinis sa isang tao.", eng: "This is because of the hearts that we lie, hate and get annoyed with someone.", pron: "이또 아이 다힐 사 망아 뿌송 낙시시눙알링, 나뽀뽀옷, 앗 나이이니스 사 이상 따오." },
-      { kor: "우리는 이런 마음들 때문에 자유롭지 못해요.", fil: "Hindi tayo maaaring maging malaya dahil sa mga pusong ito.", eng: "We can not be free because of these hearts.", pron: "힌디 따요 마아아링 마깅 말라야 다힐 사 망아 뿌송 이또." },
-      { kor: "우리의 이런 죄는 오직 하나님만이 씻어주실 수 있는데요.", fil: "Ang Diyos lamang ang makapaglilinis ng ating kasalanan.", eng: "Only God can wash away our sin.", pron: "앙 디요스 라망 앙 마까빡릴리니스 낭 아띵 까살라난." },
-      { kor: "하나님은 우리의 죄를 용서해주시기 위해서 놀라운 방법을 주셨답니다.", fil: "Binigyan tayo ng Diyos ng magandang paraan para mapatawad ang ating kasalanan.", eng: "God gave us an incredible way to forgive our sin.", pron: "비니기안 따요 낭 디요스 낭 마간당 빠라안 빠라 마빠따와드 앙 아띵 까살라난." }
-    ]
-  },
-  {
-    title: "예수님의 십자가와 부활",
-    shortTitle: "십자가",
-    lines: [
-      { kor: "하나님은 그의 아들 예수님을 우리에게 보내셨고", fil: "Ipinadala sa atin ng Diyos ang Kanyang anak, si Hesus.", eng: "God sent us His son, Jesus.", pron: "이피나달라 사 아띤 낭 디요스 앙 까냥 아낙, 시 헤수스." },
-      { kor: "죄 없는 예수님이 십자가에 매달려 죽음으로써 우리의 죄를 용서받게 해주셨어요.", fil: "Pinatawad Niya ang ating kasalanan sa pamamagitan ng pagpapako sa inosenteng Hesus.", eng: "He has forgiven our sin by crucifying innocent Jesus.", pron: "삐나따와드 니야 앙 아띤 까살라난 사 빠마마기딴 낭 빡빠빠꼬 사 이노센뗑 헤수스." },
-      { kor: "사람들은 믿지 않았지만 십자가에 못 박혀 돌아가신 예수님은 하나님의 말씀처럼 사흘 만에 다시 살아나셨어요.", fil: "Hindi naniwala ang mga tao, ngunit si Hesus na ipinako sa krus ay nabuhay muli sa loob ng tatlong araw gaya ng sinabi ng Diyos.", eng: "People didn't believe it, but crucified Jesus came back to life in three days as God said.", pron: "힌디 나니왈라 앙 망아 따오, 응우닛 시 헤수스 나 이삐나꼬 사 크루스 아이 나부하이 물리 사 로옵 낭 따뜨롱 아라우 가야 낭 시나비 낭 디요스." },
-      { kor: "놀랍고 감사하지 않나요?", fil: "Hindi ba't nakakagulat at nagpapasalamat?", eng: "Isn't it surprising and thankful?", pron: "힌디 밧 나까까굴랏 앗 낙빠빠살라-맛?" }
-    ]
-  },
-  {
-    title: "예수님을 마음에 모시기",
-    shortTitle: "영접",
-    lines: [
-      { kor: "자 보세요~ 그림처럼 예수님은 오늘도 당신의 마음 문을 두드리고 계세요.", fil: "Tingnan ang larawang ito. Tulad nito, kumakatok si Hesus sa pintuan ng iyong puso ngayon.", eng: "Look at this picture. Like this, Jesus is knocking on the door of your heart today.", pron: "띵난 앙 라라왕 이또. 뚤라드 니또, 꾸마까똑 시 헤수스 사 삔뚜안 낭 이용 뿌소 응아욘." },
-      { kor: "당신을 위해 죽으심으로 당신의 모든 죄를 다 용서하셨다는 것을 믿고 예수님을 마음에 모신다면", fil: "Kung naniniwala ka na si Hesus ay namatay para sa iyo at pinatawad ang lahat ng iyong mga kasalanan at kung tinatanggap mo si Hesus sa iyong puso,", eng: "If you believe Jesus has died for you and forgiven all your sins and if you take Jesus into your heart,", pron: "꿍 나니니왈라 까 나 시 헤수스 아이 나마따이 빠라 사 이요 앗 삐나따와드 앙 라핫 낭 이용 망아 까살라난 앗 꿍 띠나딴깝 모 시 헤수스 사 이용 뿌소," },
-      { kor: "모든 죄를 용서받고 깨끗한 마음으로 천국에 갈 수 있어요.", fil: "Ikaw ay patatawarin at maaari kang pumunta sa Langit nang may malinis na puso.", eng: "You'll be forgiven and you can go to Heaven with pure heart.", pron: "이까우 아이 빠따따와린 앗 마아아리 깡 뿌문따 사 랑잇 낭 마이 말리니스 나 뿌소." },
-      { kor: "지금 예수님을 마음에 모시길 원하나요?", fil: "Nais mo bang tanggapin si Hesus sa iyong puso ngayon?", eng: "Do you wanna take Jesus into your heart now?", pron: "나이스 모 방 딴깝인 시 헤수스 사 이용 뿌소 응아욘?" },
-      { kor: "그럼 저를 따라서 기도해요.", fil: "Sabayan mo ako sa panalangin.", eng: "Then pray like me.", pron: "사바얀 모 아꼬 사 빠날랑인." },
-      { kor: "하나님 저는 죄를 지었어요. 저희 죄를 대신해서 예수님이 죽으시고 다시 사신 것을 믿어요.", fil: "Diyos ko, nagkasala ako. Naniniwala ako na si Hesus ay namatay para sa ating kasalanan at nabuhay muli.", eng: "God, I have sinned. I believe Jesus died for our sin and lived again.", pron: "디요스 꼬, 낙까살라 아꼬. 나니니왈라 아꼬 나 시 헤수스 아이 나마따이 빠라 사 아띵 까살라난 앗 나부하이 물리." },
-      { kor: "예수님 지금 제 마음에 들어와 주세요. 예수님의 이름으로 기도합니다. 아멘!", fil: "Pumasok ka sa aking puso ngayon, Hesus. Sa pangalan ni Hesus, Amen.", eng: "Please come to my heart now, Jesus. In Jesus name, Amen.", pron: "뿌마속 까 사 아낑 뿌소 응아욘, 헤수스. 사 빵알란 니 헤수스, 아멘." }
+    id: 'lupang-hinirang',
+    icon: '🇵🇭',
+    title: '필리핀 국가',
+    subtitle: 'Lupang Hinirang',
+    tagline: 'The Philippine National Anthem',
+    mp3Prefix: 'mp3_lupang/',
+    mp3Pattern: (num, s, l) => `${num}_lupang_learning.mp3`,
+    sections: [
+      {
+        title: "Lupang Hinirang (선택받은 땅)", shortTitle: "국가",
+        lines: [
+          { kor: "사랑스러운 나라, 동방의 진주여,", fil: "Bayang Magiliw, Perlas ng Silanganan,", eng: "Beloved Country, Pearl of the Orient,", pron: "바양 마길리우, 뻬를라스 낭 실랑아난," },
+          { kor: "가슴 속에 타오르는 열정이 살아있네.", fil: "Alab ng puso, Sa dibdib mo'y buhay.", eng: "The flame of the heart, In your chest alive.", pron: "알랍 낭 뿌소, 사 딥딥 모이 부하이." },
+          { kor: "선택받은 땅이여, 용감한 이들의 요람이여.", fil: "Lupang Hinirang, Duyan ka nang magiting.", eng: "Chosen Land, Cradle of the brave.", pron: "루빵 히니랑, 두얀 까 낭 마기띵." },
+          { kor: "침략자에게 결코 굴복하지 않으리.", fil: "Sa manlulupig, Di ka pasisiil.", eng: "To the conqueror, You shall never yield.", pron: "사 만루루삑, 디 까 빠시시일." },
+          { kor: "바다와 산에,", fil: "Sa dagat at bundok,", eng: "On sea and on mountain,", pron: "사 다갓 앗 분독," },
+          { kor: "바람과 네 푸른 하늘에,", fil: "Sa simoy at sa langit mong bughaw,", eng: "In the breeze and in your blue sky,", pron: "사 시모이 앗 사 랑잇 몽 부가우," },
+          { kor: "사랑하는 자유를 노래하는 아름다운 시와 노래가 있네.", fil: "May dilag ang tula at awit sa paglayang minamahal.", eng: "There is beauty in the poem and song for beloved freedom.", pron: "마이 딜락 앙 뚤라 앗 아윗 사 빡라양 미나마할." },
+          { kor: "너의 깃발의 빛남은 빛나는 승리라.", fil: "Ang kislap ng watawat mo'y tagumpay na nagniningning.", eng: "The sparkle of your flag is the victory shining.", pron: "앙 끼슬랍 낭 와따왓 모이 따굼빠이 나 낙니닝닝." },
+          { kor: "그 별과 태양은 결코 어두워지지 않으리.", fil: "Ang bituin at araw niya kailan pa may di magdidilim.", eng: "Its stars and sun shall never dim.", pron: "앙 비뚜인 앗 아라우 니야 까일란 빠 마이 디 막디딜림." },
+          { kor: "태양의 땅, 영광과 사랑의 땅,", fil: "Lupa ng araw, ng luwalhati't pagsinta,", eng: "Land of the sun, of glory and love,", pron: "루빠 낭 아라우, 낭 루왈하띳 빡신따," },
+          { kor: "네 곁에서의 삶은 천국이라;", fil: "Buhay ay langit sa piling mo;", eng: "Life is heaven in your arms;", pron: "부하이 아이 랑잇 사 삘링 모;" },
+          { kor: "압제자가 있을 때 우리의 기쁨은,", fil: "Aming ligaya ng'pag may mang-aapi,", eng: "Our joy when there are oppressors,", pron: "아밍 리가야 응빡 마이 망-아아삐," },
+          { kor: "너를 위해 목숨을 바치는 것이라.", fil: "Ang mamatay nang dahil sa'yo.", eng: "Is to die for your sake.", pron: "앙 마마따이 낭 다힐 사요." }
+        ]
+      }
     ]
   }
 ];
 
+let activeContent = 0;
+let data = allContents[0].sections;
+
+function switchContent(idx) {
+  activeContent = idx;
+  const content = allContents[idx];
+  data = content.sections;
+
+  // Update main tabs
+  document.querySelectorAll('.main-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+
+  // Update hero
+  document.querySelector('.hero-icon').textContent = content.icon;
+  document.getElementById('heroTitle').textContent = content.title;
+  document.getElementById('heroSubtitle').textContent = content.subtitle;
+  document.getElementById('heroTagline').textContent = content.tagline;
+
+  // Reset state
+  activeSection = 0;
+  resetPlayback();
+  render();
+}
+
 // ===== MP3 파일 매핑 =====
-// mp3/ 폴더에 학습용 MP3 파일을 넣어주세요
 function getMp3Path(globalIdx) {
+  const content = allContents[activeContent];
   const num = String(globalIdx).padStart(2, '0');
-  // 섹션-라인 번호 계산
   let count = 0;
   for (let s = 0; s < data.length; s++) {
     for (let l = 0; l < data[s].lines.length; l++) {
       count++;
       if (count === globalIdx) {
-        return `mp3/${num}_${s+1}-${l+1}_learning.mp3`;
+        return content.mp3Prefix + content.mp3Pattern(num, s+1, l+1);
       }
     }
   }
