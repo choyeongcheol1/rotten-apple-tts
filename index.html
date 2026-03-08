@@ -560,9 +560,10 @@
 
 <!-- MAIN TABS -->
 <div class="main-tabs">
-  <button class="main-tab active" onclick="switchContent(0)">🍎 썩은 사과</button>
-  <button class="main-tab" onclick="switchContent(1)">🇵🇭 필리핀 국가</button>
+  <button class="main-tab active" onclick="switchContent(0)">🍎 썩은사과</button>
+  <button class="main-tab" onclick="switchContent(1)">🇵🇭 국가</button>
   <button class="main-tab" onclick="showVocab()">📖 단어장</button>
+  <button class="main-tab" onclick="showConvo()">💬 회화</button>
 </div>
 
 <!-- HEADER -->
@@ -601,6 +602,13 @@
   <div class="vocab-filter" id="vocabFilter"></div>
   <div class="vocab-tap-hint">카드를 탭하면 뜻이 나옵니다</div>
   <div id="vocabCards"></div>
+</div>
+
+<!-- CONVERSATION SECTION -->
+<div class="vocab-wrap" id="convoWrap">
+  <div class="vocab-filter" id="convoFilter"></div>
+  <div class="vocab-tap-hint">카드를 탭하면 한국어 뜻이 나옵니다 · 🔊 버튼으로 듣기</div>
+  <div id="convoCards"></div>
 </div>
 
 <!-- FONT SIZE CONTROL -->
@@ -1121,6 +1129,7 @@ function showVocab() {
   document.getElementById('speedBar').style.display = 'none';
   document.getElementById('playerBar').style.display = 'none';
   document.getElementById('vocabWrap').classList.add('active');
+  document.getElementById('convoWrap').classList.remove('active');
   document.querySelector('.font-control').classList.add('vocab-mode');
 
   // Update hero
@@ -1213,10 +1222,226 @@ function renderVocab() {
   });
 }
 
-// Override switchContent to also hide vocab
+// ===== CONVERSATION DATA (100 phrases) =====
+const convoData = {
+  "👋 인사/소개": [
+    { fil: "Magandang umaga po.", pron: "마간당 우마가 뽀", kor: "좋은 아침입니다." },
+    { fil: "Magandang hapon po.", pron: "마간당 하뽄 뽀", kor: "좋은 오후입니다." },
+    { fil: "Magandang gabi po.", pron: "마간당 가비 뽀", kor: "좋은 저녁입니다." },
+    { fil: "Kumusta ka?", pron: "꾸무스따 까?", kor: "어떻게 지내세요?" },
+    { fil: "Mabuti naman, salamat.", pron: "마부띠 나만, 살라맛", kor: "잘 지내요, 감사합니다." },
+    { fil: "Ako si [pangalan]. Taga-Korea ako.", pron: "아꼬 시 [이름]. 따가-코리아 아꼬", kor: "저는 [이름]입니다. 한국에서 왔어요." },
+    { fil: "Galing ako sa Serin Church sa Korea.", pron: "갈링 아꼬 사 세린 처치 사 코리아", kor: "한국 세린교회에서 왔습니다." },
+    { fil: "Ikinagagalak kong makilala ka.", pron: "이끼나가갈락 꽁 마낄라라 까", kor: "만나서 반갑습니다." },
+    { fil: "Ano ang pangalan mo?", pron: "아노 앙 빵알란 모?", kor: "이름이 뭐예요?" },
+    { fil: "Ilang taon ka na?", pron: "일랑 따온 까 나?", kor: "몇 살이에요?" },
+    { fil: "Saan ka nakatira?", pron: "사안 까 나까띠라?", kor: "어디에 살아요?" },
+    { fil: "Paalam na. Ingat ka!", pron: "빠알람 나. 잉앗 까!", kor: "안녕히 가세요. 조심하세요!" },
+    { fil: "Magkita tayo ulit!", pron: "막끼따 따요 울릿!", kor: "또 만나요!" },
+  ],
+  "⛪ 교회/예배": [
+    { fil: "Tara, sama ka sa simbahan.", pron: "따라, 사마 까 사 심바한", kor: "같이 교회 가요." },
+    { fil: "Anong oras ang worship?", pron: "아농 오라스 앙 워십?", kor: "예배가 몇 시예요?" },
+    { fil: "Manalangin tayo.", pron: "마날랑인 따요", kor: "기도합시다." },
+    { fil: "Purihin ang Diyos!", pron: "뿌리힌 앙 디요스!", kor: "하나님을 찬양합시다!" },
+    { fil: "Mahal ka ng Diyos.", pron: "마할 까 낭 디요스", kor: "하나님이 당신을 사랑해요." },
+    { fil: "Basahin natin ang Bibliya.", pron: "바사힌 나띤 앙 비블리야", kor: "성경을 읽읍시다." },
+    { fil: "Ano ang paborito mong talata?", pron: "아노 앙 빠보리또 몽 딸라따?", kor: "좋아하는 성경 구절이 뭐예요?" },
+    { fil: "Si Hesus ang ating Panginoon.", pron: "시 헤수스 앙 아띵 빵이노온", kor: "예수님은 우리의 주님이십니다." },
+    { fil: "Ipagdasal kita.", pron: "이빡다살 끼따", kor: "당신을 위해 기도할게요." },
+    { fil: "Salamat sa Diyos!", pron: "살라맛 사 디요스!", kor: "하나님께 감사합니다!" },
+    { fil: "May Bible study tayo mamaya.", pron: "마이 바이블 스터디 따요 마마야", kor: "이따가 성경공부가 있어요." },
+    { fil: "Sumama ka sa aming grupo.", pron: "수마마 까 사 아밍 그루뽀", kor: "우리 그룹에 함께해요." },
+  ],
+  "🍚 식사/음식": [
+    { fil: "Gutom na ako.", pron: "구똠 나 아꼬", kor: "배고파요." },
+    { fil: "Kain na tayo!", pron: "까인 나 따요!", kor: "밥 먹자!" },
+    { fil: "Masarap ba ito?", pron: "마사랍 바 이또?", kor: "이거 맛있어요?" },
+    { fil: "Masarap!", pron: "마사랍!", kor: "맛있어요!" },
+    { fil: "Ano ang pagkain na ito?", pron: "아노 앙 빡까인 나 이또?", kor: "이 음식이 뭐예요?" },
+    { fil: "Puwede bang tubig?", pron: "뿌웨데 방 뚜빅?", kor: "물 좀 주세요." },
+    { fil: "Hindi ako kumakain ng baboy.", pron: "힌디 아꼬 꾸마까인 낭 바보이", kor: "저는 돼지고기를 안 먹어요." },
+    { fil: "Busog na ako. Salamat!", pron: "부속 나 아꼬. 살라맛!", kor: "배불러요. 감사합니다!" },
+    { fil: "Isa pa nga po.", pron: "이사 빠 응아 뽀", kor: "하나 더 주세요." },
+    { fil: "Magkano po ito?", pron: "막까노 뽀 이또?", kor: "이거 얼마예요?" },
+    { fil: "Saan ang magandang kainan dito?", pron: "사안 앙 마간당 까이난 디또?", kor: "여기 맛있는 식당이 어디예요?" },
+    { fil: "Libre kita ng pagkain.", pron: "리브레 끼따 낭 빡까인", kor: "제가 식사 대접할게요." },
+    { fil: "Salamat sa masarap na pagkain!", pron: "살라맛 사 마사랍 나 빡까인!", kor: "맛있는 음식 감사합니다!" },
+  ],
+  "🗺️ 길찾기/교통": [
+    { fil: "Saan po ito?", pron: "사안 뽀 이또?", kor: "여기가 어디예요?" },
+    { fil: "Paano pumunta sa [lugar]?", pron: "빠아노 뿌문따 사 [장소]?", kor: "[장소]에 어떻게 가요?" },
+    { fil: "Malayo pa ba?", pron: "말라요 빠 바?", kor: "아직 멀어요?" },
+    { fil: "Malapit lang.", pron: "말라삣 랑", kor: "가까워요." },
+    { fil: "Kanan po.", pron: "까난 뽀", kor: "오른쪽이요." },
+    { fil: "Kaliwa po.", pron: "깔리와 뽀", kor: "왼쪽이요." },
+    { fil: "Diretso lang po.", pron: "디렛쏘 랑 뽀", kor: "쭉 직진이요." },
+    { fil: "Magkano po ang pamasahe?", pron: "막까노 뽀 앙 빠마사헤?", kor: "차비가 얼마예요?" },
+    { fil: "Para po!", pron: "빠라 뽀!", kor: "여기서 내릴게요!" },
+    { fil: "Puwede po bang mag-tricycle?", pron: "뿌웨데 뽀 방 막-뜨라이시클?", kor: "트라이시클 탈 수 있어요?" },
+    { fil: "Saan ang pinakamalapit na palengke?", pron: "사안 앙 삐나까말라삣 나 빨렝게?", kor: "가장 가까운 시장이 어디예요?" },
+    { fil: "Naliligaw ako.", pron: "날리리가우 아꼬", kor: "길을 잃었어요." },
+  ],
+  "🛒 쇼핑/시장": [
+    { fil: "Magkano po ito?", pron: "막까노 뽀 이또?", kor: "이거 얼마예요?" },
+    { fil: "Mahal naman!", pron: "마할 나만!", kor: "너무 비싸요!" },
+    { fil: "Puwede bang tumawad?", pron: "뿌웨데 방 뚜마와드?", kor: "깎아주실 수 있어요?" },
+    { fil: "Mura na po ba ito?", pron: "무라 나 뽀 바 이또?", kor: "이게 제일 싼 거예요?" },
+    { fil: "Kukunin ko na ito.", pron: "꾸꾸닌 꼬 나 이또", kor: "이거 살게요." },
+    { fil: "May iba pa bang kulay?", pron: "마이 이바 빠 방 꿀라이?", kor: "다른 색깔 있어요?" },
+    { fil: "May mas malaki ba?", pron: "마이 마스 말라끼 바?", kor: "더 큰 거 있어요?" },
+    { fil: "Saan ang palengke?", pron: "사안 앙 빨렝게?", kor: "시장이 어디예요?" },
+    { fil: "Puwede bang tingin-tingin lang?", pron: "뿌웨데 방 띵인-띵인 랑?", kor: "구경만 해도 돼요?" },
+    { fil: "May sukli po ba?", pron: "마이 수끌리 뽀 바?", kor: "거스름돈 있어요?" },
+    { fil: "Salamat po! Balik ako ulit.", pron: "살라맛 뽀! 발릭 아꼬 울릿", kor: "감사합니다! 다시 올게요." },
+    { fil: "Saan ang ATM dito?", pron: "사안 앙 에이티엠 디또?", kor: "여기 ATM이 어디예요?" },
+  ],
+  "🏥 병원/응급": [
+    { fil: "Masakit ang ulo ko.", pron: "마사낏 앙 울로 꼬", kor: "머리가 아파요." },
+    { fil: "Masakit ang tiyan ko.", pron: "마사낏 앙 띠얀 꼬", kor: "배가 아파요." },
+    { fil: "May lagnat ako.", pron: "마이 락낫 아꼬", kor: "열이 나요." },
+    { fil: "Kailangan ko ng gamot.", pron: "까일랑안 꼬 낭 가못", kor: "약이 필요해요." },
+    { fil: "Saan ang ospital?", pron: "사안 앙 오스삐딸?", kor: "병원이 어디예요?" },
+    { fil: "Saan ang botika?", pron: "사안 앙 보띠까?", kor: "약국이 어디예요?" },
+    { fil: "Tulungan mo ako!", pron: "뚤룽안 모 아꼬!", kor: "도와주세요!" },
+    { fil: "May allergy ako sa [pagkain].", pron: "마이 알러지 아꼬 사 [음식]", kor: "저는 [음식] 알레르기가 있어요." },
+    { fil: "Tumawag ng ambulansya!", pron: "뚜마왁 낭 암불란시야!", kor: "구급차를 불러주세요!" },
+    { fil: "Hindi ako makapagsalita ng Tagalog.", pron: "힌디 아꼬 마까빡살리따 낭 따갈로그", kor: "타갈로그어를 못해요." },
+    { fil: "May nagsasalita ba ng English?", pron: "마이 낙사살리따 바 낭 잉글리쉬?", kor: "영어 하시는 분 있어요?" },
+    { fil: "Dahan-dahan lang po.", pron: "다한-다한 랑 뽀", kor: "천천히 해주세요." },
+  ],
+  "🙏 감사/격려": [
+    { fil: "Salamat po!", pron: "살라맛 뽀!", kor: "감사합니다!" },
+    { fil: "Maraming salamat po!", pron: "마라밍 살라맛 뽀!", kor: "정말 감사합니다!" },
+    { fil: "Walang anuman.", pron: "왈랑 아누만", kor: "천만에요." },
+    { fil: "Pasensya na po.", pron: "빠센시야 나 뽀", kor: "죄송합니다." },
+    { fil: "Okay lang!", pron: "오케이 랑!", kor: "괜찮아요!" },
+    { fil: "Kaya mo yan!", pron: "까야 모 얀!", kor: "넌 할 수 있어!" },
+    { fil: "Pagpalain ka ng Diyos.", pron: "빡빨라인 까 낭 디요스", kor: "하나님이 축복하시길." },
+    { fil: "Kasama natin ang Diyos.", pron: "까사마 나띤 앙 디요스", kor: "하나님이 우리와 함께하십니다." },
+    { fil: "Huwag kang mag-alala.", pron: "후왁 깡 막-알랄라", kor: "걱정하지 마세요." },
+    { fil: "Ipagdarasal kita.", pron: "이빡다라살 끼따", kor: "당신을 위해 기도할게요." },
+    { fil: "Mahal kita sa pangalan ni Hesus.", pron: "마할 끼따 사 빵알란 니 헤수스", kor: "예수님의 이름으로 사랑합니다." },
+    { fil: "Laban lang!", pron: "라반 랑!", kor: "힘내세요! (파이팅!)" },
+    { fil: "Ang galing mo!", pron: "앙 갈링 모!", kor: "잘했어요! (대단해요!)" },
+  ],
+  "💬 일상 대화": [
+    { fil: "Oo.", pron: "오오", kor: "네." },
+    { fil: "Hindi.", pron: "힌디", kor: "아니오." },
+    { fil: "Ewan ko.", pron: "에완 꼬", kor: "모르겠어요." },
+    { fil: "Sandali lang.", pron: "산달리 랑", kor: "잠깐만요." },
+    { fil: "Puwede bang ulitin?", pron: "뿌웨데 방 울리띤?", kor: "다시 말해주세요." },
+    { fil: "Anong ibig sabihin nito?", pron: "아농 이빅 사비힌 니또?", kor: "이게 무슨 뜻이에요?" },
+    { fil: "Ang ganda!", pron: "앙 간다!", kor: "예뻐요! (아름다워요!)" },
+    { fil: "Ang init!", pron: "앙 이닛!", kor: "덥다!" },
+    { fil: "Saan ang CR?", pron: "사안 앙 씨알?", kor: "화장실이 어디예요?" },
+    { fil: "Puwede bang kumuha ng litrato?", pron: "뿌웨데 방 꾸무하 낭 리뜨라또?", kor: "사진 찍어도 돼요?" },
+    { fil: "Magkasama tayo!", pron: "막까사마 따요!", kor: "우리 함께해요!" },
+    { fil: "Nag-eenjoy ako!", pron: "낙-엔조이 아꼬!", kor: "즐거워요!" },
+    { fil: "Mahal ko ang Pilipinas!", pron: "마할 꼬 앙 필리피나스!", kor: "필리핀을 사랑합니다!" },
+  ],
+};
+
+let activeConvoCategory = '전체';
+
+function showConvo() {
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.main-tab')[3].classList.add('active');
+
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('nav').style.display = 'none';
+  document.getElementById('langToggle').style.display = 'none';
+  document.getElementById('speedBar').style.display = 'none';
+  document.getElementById('playerBar').style.display = 'none';
+  document.getElementById('vocabWrap').classList.remove('active');
+  document.getElementById('convoWrap').classList.add('active');
+  document.querySelector('.font-control').classList.add('vocab-mode');
+
+  document.querySelector('.hero-icon').textContent = '💬';
+  document.getElementById('heroTitle').textContent = '기본회화';
+  document.getElementById('heroSubtitle').textContent = 'Pangunahing Pag-uusap';
+  document.getElementById('heroTagline').textContent = 'Filipino Basic Conversation';
+
+  renderConvoFilter();
+  renderConvo();
+}
+
+function hideConvo() {
+  document.getElementById('convoWrap').classList.remove('active');
+}
+
+function renderConvoFilter() {
+  const container = document.getElementById('convoFilter');
+  const categories = ['전체', ...Object.keys(convoData)];
+  container.innerHTML = '';
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'vocab-filter-btn' + (cat === activeConvoCategory ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => { activeConvoCategory = cat; renderConvoFilter(); renderConvo(); };
+    container.appendChild(btn);
+  });
+}
+
+function speakConvo(text, btn, e) {
+  e.stopPropagation();
+  const convoAudioEl = document.getElementById('convoAudioEl') || (() => {
+    const a = new Audio(); a.id = 'convoAudioEl'; return a;
+  })();
+  convoAudioEl.pause();
+  const fname = text.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_').toLowerCase().substring(0, 60);
+  convoAudioEl.src = 'mp3_convo/' + fname + '.mp3';
+  btn.classList.add('playing');
+  convoAudioEl.onended = () => btn.classList.remove('playing');
+  convoAudioEl.onerror = () => {
+    btn.classList.remove('playing');
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fil-PH';
+    utterance.rate = 0.85;
+    speechSynthesis.speak(utterance);
+  };
+  convoAudioEl.play();
+}
+
+function renderConvo() {
+  const container = document.getElementById('convoCards');
+  container.innerHTML = '';
+
+  const categories = activeConvoCategory === '전체' ? Object.keys(convoData) : [activeConvoCategory];
+
+  categories.forEach(cat => {
+    const catDiv = document.createElement('div');
+    catDiv.className = 'vocab-category';
+    catDiv.textContent = `${cat} (${convoData[cat].length}개)`;
+    container.appendChild(catDiv);
+
+    convoData[cat].forEach(phrase => {
+      const card = document.createElement('div');
+      card.className = 'vocab-card';
+      card.onclick = () => card.classList.toggle('flipped');
+      const filEscaped = phrase.fil.replace(/'/g, "\\'");
+      card.innerHTML = `
+        <div class="vocab-top">
+          <div>
+            <div class="vocab-fil">${phrase.fil}</div>
+            <div class="vocab-pron">(${phrase.pron})</div>
+          </div>
+          <button class="vocab-listen-btn" onclick="speakConvo('${filEscaped}', this, event)" title="듣기">🔊</button>
+        </div>
+        <div class="vocab-answer">
+          <div class="vocab-kor">${phrase.kor}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  });
+}
+
+// Override switchContent to also hide convo
 const origSwitchContent = switchContent;
 switchContent = function(idx) {
   hideVocab();
+  hideConvo();
   origSwitchContent(idx);
 };
 
