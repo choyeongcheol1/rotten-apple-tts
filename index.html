@@ -349,6 +349,10 @@
     gap: 4px;
     z-index: 200;
   }
+  .vocab-wrap.active ~ .font-control,
+  .font-control.vocab-mode {
+    bottom: 20px;
+  }
 
   .font-btn {
     width: 36px; height: 36px;
@@ -977,6 +981,11 @@ function toggleLang(lang) {
 function changeFontSize(delta) {
   baseFontSize = Math.max(12, Math.min(22, baseFontSize + delta));
   document.querySelectorAll('.lang-text').forEach(el => el.style.fontSize = baseFontSize + 'px');
+  document.querySelectorAll('.vocab-fil').forEach(el => el.style.fontSize = (baseFontSize + 2) + 'px');
+  document.querySelectorAll('.vocab-kor').forEach(el => el.style.fontSize = baseFontSize + 'px');
+  document.querySelectorAll('.vocab-pron').forEach(el => el.style.fontSize = (baseFontSize - 2) + 'px');
+  document.querySelectorAll('.vocab-eng').forEach(el => el.style.fontSize = (baseFontSize - 3) + 'px');
+  document.querySelectorAll('.vocab-example').forEach(el => el.style.fontSize = (baseFontSize - 4) + 'px');
 }
 
 function playSectionAll(sIdx) {
@@ -1112,6 +1121,7 @@ function showVocab() {
   document.getElementById('speedBar').style.display = 'none';
   document.getElementById('playerBar').style.display = 'none';
   document.getElementById('vocabWrap').classList.add('active');
+  document.querySelector('.font-control').classList.add('vocab-mode');
 
   // Update hero
   document.querySelector('.hero-icon').textContent = '📖';
@@ -1130,6 +1140,7 @@ function hideVocab() {
   document.getElementById('speedBar').style.display = '';
   document.getElementById('playerBar').style.display = '';
   document.getElementById('vocabWrap').classList.remove('active');
+  document.querySelector('.font-control').classList.remove('vocab-mode');
 }
 
 function renderVocabFilter() {
